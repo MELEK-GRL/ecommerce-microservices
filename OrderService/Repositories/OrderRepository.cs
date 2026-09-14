@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.Entities;
+using OrderService.Events;
 
 namespace OrderService.Repositories;
 
@@ -17,11 +19,70 @@ public class OrderRepository : IOrderRepository
         Order order,
         CancellationToken cancellationToken)
     {
-        await _context.Orders.AddAsync(order, cancellationToken);
+        await _context.Orders.AddAsync(
+            order,
+            cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(
+            cancellationToken);
 
         return order;
+    }
+
+    public async Task<Order> CreateWithOutboxAsync(
+        Order order,
+        CancellationToken cancellationToken)
+    {
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync(
+                cancellationToken);
+
+        try
+        {
+            await _context.Orders.AddAsync(
+                order,
+                cancellationToken);
+
+            await _context.SaveChangesAsync(
+                cancellationToken);
+
+            var orderCreatedEvent = new OrderCreatedEvent
+            {
+                OrderId = order.Id,
+                Items = order.Items.Select(x => new OrderCreatedItem
+                {
+                    ProductId = x.ProductId,
+                    Quantity = x.Quantity
+                }).ToList()
+            };
+
+            var outboxMessage = new OutboxMessage
+            {
+                Type = "OrderCreated",
+                Payload = JsonSerializer.Serialize(
+                    orderCreatedEvent),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.OutboxMessages.AddAsync(
+                outboxMessage,
+                cancellationToken);
+
+            await _context.SaveChangesAsync(
+                cancellationToken);
+
+            await transaction.CommitAsync(
+                cancellationToken);
+
+            return order;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(
+                cancellationToken);
+
+            throw;
+        }
     }
 
     public async Task<List<Order>> GetAllAsync(
@@ -42,6 +103,7 @@ public class OrderRepository : IOrderRepository
                 x => x.Id == id,
                 cancellationToken);
     }
+
     public async Task<Order?> DeleteAsync(
         int id,
         CancellationToken cancellationToken)
@@ -57,7 +119,8 @@ public class OrderRepository : IOrderRepository
 
         _context.Orders.Remove(order);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(
+            cancellationToken);
 
         return order;
     }

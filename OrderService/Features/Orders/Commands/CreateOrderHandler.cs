@@ -33,7 +33,7 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, int>
         order.TotalAmount = order.Items.Sum(x =>
             x.Quantity * x.UnitPrice);
 
-        var createdOrder = await _repository.CreateAsync(
+        var createdOrder = await _repository.CreateWithOutboxAsync(
             order,
             cancellationToken);
 

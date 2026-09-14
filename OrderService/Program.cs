@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using OrderService.BackgroundServices;
 using OrderService.Behaviors;
 using OrderService.Data;
 using OrderService.Features.Orders.Commands;
@@ -30,6 +31,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddHostedService<OutboxPublisher>();
 
 var app = builder.Build();
 

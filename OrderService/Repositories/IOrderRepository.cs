@@ -8,12 +8,17 @@ public interface IOrderRepository
         Order order,
         CancellationToken cancellationToken);
 
+    Task<Order> CreateWithOutboxAsync(
+        Order order,
+        CancellationToken cancellationToken);
+
     Task<List<Order>> GetAllAsync(
         CancellationToken cancellationToken);
 
     Task<Order?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken);
+
     Task<Order?> DeleteAsync(
         int id,
         CancellationToken cancellationToken);
