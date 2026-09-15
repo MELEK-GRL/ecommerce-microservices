@@ -1,7 +1,5 @@
 using ProductService.Entities;
 
-namespace ProductService.Repositories;
-
 public interface IProductRepository
 {
     Task<Product> CreateAsync(
@@ -17,5 +15,10 @@ public interface IProductRepository
 
     Task<Product?> DeleteAsync(
         int id,
+        CancellationToken cancellationToken);
+
+    Task<Product?> DecreaseStockAsync(
+        int productId,
+        int quantity,
         CancellationToken cancellationToken);
 }

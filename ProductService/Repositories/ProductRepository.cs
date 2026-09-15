@@ -59,4 +59,24 @@ public class ProductRepository : IProductRepository
 
         return product;
     }
+    public async Task<Product?> DecreaseStockAsync(
+        int productId,
+        int quantity,
+        CancellationToken cancellationToken)
+    {
+        var product = await _context.Products
+            .FirstOrDefaultAsync(
+                x => x.Id == productId,
+                cancellationToken);
+
+        if (product == null)
+            return null;
+
+        product.Stock -= quantity;
+
+        await _context.SaveChangesAsync(
+            cancellationToken);
+
+        return product;
+    }
 }

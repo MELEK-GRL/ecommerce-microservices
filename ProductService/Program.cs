@@ -1,11 +1,15 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ProductService.BackgroundServices;
 using ProductService.Behaviors;
 using ProductService.Data;
 using ProductService.Features.Commands;
 using ProductService.Repositories;
 using ProductService.Exceptions;
+using ProductService.Services;
+using StackExchange.Redis;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -30,7 +34,10 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-
+builder.Services.AddHostedService<ProductServiceConsumer>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379"));
+builder.Services.AddSingleton<IProductCacheService, ProductCacheService>();
 var app = builder.Build();
 
 app.UseExceptionHandler();
