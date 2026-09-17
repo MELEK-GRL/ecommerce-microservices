@@ -7,7 +7,7 @@ Projede servislerin birbirinden bağımsız çalıştığı, her servisin kendi 
 Özellikle Microservices, CQRS, MediatR, Entity Framework Core, LINQ, Dapper, RabbitMQ, Outbox Pattern, Redis, Idempotency, Docker, SQL Server ve API Gateway konularında uygulamalı çalışma yaptım.
 
 
-# 🏗️ Proje Mimarisi
+# Proje Mimarisi
 
 ~~~text
                                       CLIENT
@@ -56,7 +56,7 @@ Projede servislerin birbirinden bağımsız çalıştığı, her servisin kendi 
 ~~~
 
 
-# 🗄️ Database-per-Service
+#  Database-per-Service
 
 Her microservice kendi database'inin sorumluluğuna sahip olacak şekilde tasarlandı.
 
@@ -89,7 +89,7 @@ Servisler birbirlerinin database'lerine doğrudan erişmiyor.
 Servisler arasındaki iletişim API veya event-driven communication üzerinden gerçekleştiriliyor.
 
 
-# 🐇 RabbitMQ Event Mimarisi
+# RabbitMQ Event Mimarisi
 
 Servisler arasındaki asynchronous communication için RabbitMQ kullandım.
 
@@ -189,7 +189,7 @@ OrderService → ProductService event akışı:
 ~~~
 
 
-# 🔀 RabbitMQ Exchange ve Routing Key Yapısı
+# RabbitMQ Exchange ve Routing Key Yapısı
 
 Exchange:
 
@@ -259,7 +259,7 @@ requeue: true
 kullanıyorum.
 
 
-# 👤 AuthService
+# AuthService
 
 Authentication ve kullanıcı kayıt işlemlerini yönetiyor.
 
@@ -322,7 +322,7 @@ CustomerDb
 Yeni kullanıcı kayıt olduğunda CustomerService otomatik olarak Customer kaydı oluşturuyor.
 
 
-# 📦 ProductService
+# ProductService
 
 Ürün ve stok yönetiminden sorumlu.
 
@@ -357,7 +357,7 @@ Stock Decrease
 ~~~
 
 
-# 🛒 OrderService
+# OrderService
 
 Sipariş işlemlerinden sorumlu.
 
@@ -389,7 +389,7 @@ OrderService
 ~~~
 
 
-# 📮 Outbox Pattern
+# Outbox Pattern
 
 Event publish işlemlerinde Outbox Pattern kullandım.
 
@@ -424,7 +424,7 @@ ProcessedAt = DateTime.UtcNow
 ~~~
 
 
-# 🔐 Idempotency
+# Idempotency
 
 RabbitMQ'da aynı mesajın birden fazla kez işlenebilmesi durumunu ProductService tarafında ele aldım.
 
@@ -492,7 +492,7 @@ ACK
 Stok güncelleme ve ProcessedOrder kaydını transaction içerisinde gerçekleştirdim.
 
 
-# 🔴 Redis Cache
+# Redis Cache
 
 ProductService'te ürün listesi için Redis kullandım.
 
@@ -557,7 +557,7 @@ Redis'e tekrar yaz
 ~~~
 
 
-# 🚀 CQRS + MediatR
+# CQRS + MediatR
 
 Servislerde Command ve Query işlemlerini ayırmak için CQRS yaklaşımını kullandım.
 
@@ -627,45 +627,7 @@ var products = await _context.Products
     .ToListAsync();
 ~~~
 
-
-# 🔎 LINQ
-
-Projede sık kullanılan LINQ ifadelerini uygulamalı olarak çalıştım.
-
-Öğrendiğim temel LINQ işlemleri:
-
-- Where
-- Select
-- FirstOrDefault
-- SingleOrDefault
-- Any
-- Count
-- OrderBy
-- OrderByDescending
-- Include
-- Join
-- IQueryable
-- IEnumerable
-- ToList
-- ToListAsync
-
-Örneğin:
-
-~~~csharp
-var products = await _context.Products
-    .Where(x => x.Stock > 0)
-    .Select(x => new
-    {
-        x.Id,
-        x.Name,
-        x.Price,
-        x.Stock
-    })
-    .ToListAsync();
-~~~
-
-
-# 🧠 ORM ve Micro ORM
+# ORM ve Micro ORM
 
 Veritabanı erişim teknolojilerini şu şekilde ele aldım:
 
@@ -742,7 +704,7 @@ RabbitMQ Management UI üzerinden:
 durumlarını kontrol ederek testler yaptım.
 
 
-# 🌐 API Gateway
+# API Gateway
 
 Servislerin dışarıya doğrudan açılması yerine YARP tabanlı API Gateway kullandım.
 
@@ -764,7 +726,7 @@ API Gateway
 Gateway'in amacı client'ın servislerin adreslerini tek tek bilmesi yerine merkezi bir giriş noktası sağlamaktır.
 
 
-# 🔐 Authentication
+# Authentication
 
 AuthService içerisinde JWT tabanlı authentication kullandım.
 
@@ -789,7 +751,7 @@ Client
 Korunan endpoint'lerde JWT üzerinden authentication sağlanıyor.
 
 
-# ✅ Validation
+# Validation
 
 Request modellerinin doğrulanması için FluentValidation kullandım.
 
@@ -808,7 +770,7 @@ Validation
 ~~~
 
 
-# ⚠️ Global Exception Handling
+# Global Exception Handling
 
 Uygulama içerisindeki beklenmeyen exception'ları merkezi şekilde yönetmek için Global Exception Handling yaklaşımı kullandım.
 
@@ -829,7 +791,7 @@ Standardized Error Response
 ~~~
 
 
-# 🧪 RabbitMQ Idempotency Testi
+# RabbitMQ Idempotency Testi
 
 Idempotency mekanizmasını RabbitMQ üzerinden test ettim.
 
@@ -857,7 +819,7 @@ OrderId 9999 daha önce işlendi.
 Bu test ile duplicate message senaryosunu uygulamalı olarak kontrol ettim.
 
 
-# 📊 Projede Kullandığım Teknolojiler ve Yapılar
+# Projede Kullandığım Teknolojiler ve Yapılar
 
 | Teknoloji / Pattern | Kullanım Amacı |
 |---|---|
@@ -885,32 +847,3 @@ Bu test ile duplicate message senaryosunu uygulamalı olarak kontrol ettim.
 | JWT | Authentication |
 | FluentValidation | Request validation |
 | Swagger | API test / dokümantasyon |
-
-
-# 🎯 Projede Öğrendiklerim
-
-Bu proje üzerinde çalışırken sadece CRUD geliştirmek yerine gerçek backend sistemlerinde karşılaşılabilecek problemleri uygulamalı olarak çalıştım.
-
-- Microservice architecture
-- Database-per-service
-- CQRS
-- MediatR
-- Repository Pattern
-- Dependency Injection
-- EF Core
-- LINQ
-- SQL
-- RabbitMQ
-- Event-driven architecture
-- Outbox Pattern
-- BackgroundService
-- Redis
-- Cache-Aside
-- Cache Invalidation
-- Idempotency
-- Docker
-- API Gateway
-- JWT Authentication
-- Global Exception Handling
-- FluentValidation
-
