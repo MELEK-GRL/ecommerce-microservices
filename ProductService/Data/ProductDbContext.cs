@@ -11,6 +11,7 @@ public class ProductDbContext : DbContext
     }
 
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProcessedOrder> ProcessedOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

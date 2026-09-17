@@ -1,5 +1,7 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using ProductService.Data;
 using ProductService.Events;
 using ProductService.Repositories;
 using ProductService.Services;
@@ -58,10 +60,32 @@ public class ProductServiceConsumer : BackgroundService
 
             var repository = scope.ServiceProvider
                 .GetRequiredService<IProductRepository>();
-            
+
             var cache = scope.ServiceProvider
                 .GetRequiredService<IProductCacheService>();
 
+            var dbContext = scope.ServiceProvider
+                .GetRequiredService<ProductDbContext>();
+
+            // Daha önce bu Order işlendi mi?
+            var alreadyProcessed = await dbContext.ProcessedOrders
+                .AnyAsync(
+                    x => x.OrderId == orderCreatedEvent.OrderId,
+                    CancellationToken.None);
+
+            if (alreadyProcessed)
+            {
+                Console.WriteLine(
+                    $"OrderId {orderCreatedEvent.OrderId} daha önce işlendi.");
+
+                await channel.BasicAckAsync(
+                    deliveryTag: args.DeliveryTag,
+                    multiple: false);
+
+                return;
+            }
+
+            // Stok düşür
             foreach (var item in orderCreatedEvent.Items)
             {
                 await repository.DecreaseStockAsync(
@@ -69,13 +93,27 @@ public class ProductServiceConsumer : BackgroundService
                     item.Quantity,
                     CancellationToken.None);
             }
-            Console.WriteLine("Redis cache silindi: products");
+
+            // İşlenen Order'ı kaydet
+            var processedOrder = new ProductService.Entities.ProcessedOrder
+            {
+                OrderId = orderCreatedEvent.OrderId,
+                ProcessedAt = DateTime.UtcNow
+            };
+
+            await dbContext.ProcessedOrders.AddAsync(
+                processedOrder,
+                CancellationToken.None);
+
+            await dbContext.SaveChangesAsync(CancellationToken.None);
+
+            // Redis cache'i temizle
             await cache.RemoveAsync("products");
-            Console.WriteLine("Redis cache silindi: products");
 
             Console.WriteLine(
                 $"Stok güncellendi. OrderId: {orderCreatedEvent.OrderId}");
 
+            // RabbitMQ ACK
             await channel.BasicAckAsync(
                 deliveryTag: args.DeliveryTag,
                 multiple: false);
